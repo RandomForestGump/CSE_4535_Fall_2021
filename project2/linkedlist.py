@@ -15,6 +15,7 @@ class Node:
             Hint: You may want to define skip pointers & appropriate score calculation here"""
         self.value = value
         self.next = next
+        self.skip_point = None
 
 
 class LinkedList:
@@ -51,6 +52,8 @@ class LinkedList:
         n_skips = math.floor(math.sqrt(self.length))
         if n_skips * n_skips == self.length:
             n_skips = n_skips - 1
+
+
         """ Write logic to add skip pointers to the linked list. 
             This function does not return anything.
             To be implemented."""
@@ -61,5 +64,13 @@ class LinkedList:
             Insert the element at an appropriate position, such that elements to the left are lower than the inserted
             element, and elements to the right are greater than the inserted element.
             To be implemented. """
+
+        if self.end_node.val < value:
+            self.end_node.next = Node(value)
+        else:
+            #Insert in sorted order
+
+
+
         raise NotImplementedError
 

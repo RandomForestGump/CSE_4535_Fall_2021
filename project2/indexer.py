@@ -26,8 +26,15 @@ class Indexer:
     def add_to_index(self, term_, doc_id_):
         """ This function adds each term & document id to the index.
             If a term is not present in the index, then add the term to the index & initialize a new postings list (linked list).
-            If a term is present, then add the document to the appropriate position in the posstings list of the term.
+            If a term is present, then add the document to the appropriate position in the postings list of the term.
             To be implemented."""
+
+        if term_ not in self.inverted_index:
+            self.inverted_index[term_] = LinkedList()
+        else:
+            #Modify list to add doc id in sorted place using linked list ops
+            self.inverted_index[term_] = self.inverted_index[term_].insert_at_end(self, doc_id_)
+
         raise NotImplementedError
 
     def sort_terms(self):
