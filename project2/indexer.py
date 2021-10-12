@@ -4,7 +4,7 @@ Institute: University at Buffalo
 '''
 
 from linkedlist import LinkedList
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 
 
 class Indexer:
@@ -20,22 +20,50 @@ class Indexer:
     def generate_inverted_index(self, doc_id, tokenized_document):
         """ This function adds each tokenized document to the index. This in turn uses the function add_to_index
             Already implemented."""
+        # print('Generating Inverted Index for Doc ID: {}'.format(doc_id))
+        # print(tokenized_document)
+        C = Counter(tokenized_document)
         for t in tokenized_document:
-            self.add_to_index(t, doc_id)
+            self.add_to_index(t, doc_id, C)
 
-    def add_to_index(self, term_, doc_id_):
+    def print_list(self, cur):
+        x = []
+        print(cur)
+        while cur:
+            x.append(cur.value)
+            cur = cur.next
+        print(x)
+
+    def add_to_index(self, term_, doc_id_, C):
         """ This function adds each term & document id to the index.
             If a term is not present in the index, then add the term to the index & initialize a new postings list (linked list).
             If a term is present, then add the document to the appropriate position in the postings list of the term.
             To be implemented."""
-
+        tf = C[term_]
+        # if term_ not in self.inverted_index:
+        #     self.inverted_index[term_] = LinkedList()
+        # self.inverted_index[term_] = self.inverted_index[term_].insert_at_end(doc_id_)
+        # print(term_)
+        # print(1)
         if term_ not in self.inverted_index:
             self.inverted_index[term_] = LinkedList()
-        else:
-            #Modify list to add doc id in sorted place using linked list ops
-            self.inverted_index[term_] = self.inverted_index[term_].insert_at_end(self, doc_id_)
+            self.inverted_index[term_].insert_at_end(doc_id_, tf)
+        # print(2)
+        # self.print_list(self.inverted_index[term_].start_node)
+        if not (self.inverted_index[term_].has(doc_id_)):
+            self.inverted_index[term_].insert_at_end(doc_id_, tf)
+        # print(3)
 
-        raise NotImplementedError
+
+        # print(self.inverted_index.get('ventilated', 0))
+        # if term_ not in self.inverted_index or not self.inverted_index[term_]:
+        #     self.inverted_index[term_] = LinkedList(doc_id_)
+        #     self.inverted_index[term_].length+=1
+        #
+        # else:
+            #Modify list to add doc id in sorted place using linked list ops
+
+
 
     def sort_terms(self):
         """ Sorting the index by terms.

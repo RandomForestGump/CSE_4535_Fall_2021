@@ -4,10 +4,12 @@ Institute: University at Buffalo
 '''
 
 from tqdm import tqdm
+import pdb
 from preprocessor import Preprocessor
 from indexer import Indexer
 from collections import OrderedDict
 from linkedlist import LinkedList
+from linkedlist import Node
 import inspect as inspector
 import sys
 import argparse
@@ -27,12 +29,33 @@ class ProjectRunner:
         self.preprocessor = Preprocessor()
         self.indexer = Indexer()
 
-    def _merge(self):
+    def _merge(self, l1, l2):
         """ Implement the merge algorithm to merge 2 postings list at a time.
             Use appropriate parameters & return types.
             While merging 2 postings list, preserve the maximum tf-idf value of a document.
             To be implemented."""
-        raise NotImplementedError
+
+        cur1 = l1
+        cur2 = l2
+        cur3 = dummy = Node(0)
+
+        while cur1 and cur2:
+
+            if cur1.value <= cur2.value:
+                cur3.next = cur1
+                cur1 = cur1.next
+
+            else:
+                cur3.next = cur2
+                cur2 = cur2.next
+            cur3 = cur3.next
+
+        if not cur1:
+            cur3.next = cur2
+        if not cur2:
+            cur3.next = cur1
+
+        return dummy.next
 
     def _daat_and(self):
         """ Implement the DAAT AND algorithm, which merges the postings list of N query terms.
@@ -66,6 +89,9 @@ class ProjectRunner:
                 self.indexer.generate_inverted_index(doc_id, tokenized_document)
 
         self.indexer.sort_terms()
+        pdb.set_trace()
+
+
         self.indexer.add_skip_connections()
         self.indexer.calculate_tf_idf()
 
@@ -177,18 +203,18 @@ if __name__ == "__main__":
         Do NOT change it."""
 
     output_location = "project2_output.json"
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--corpus", type=str, help="Corpus File name, with path.")
-    parser.add_argument("--output_location", type=str, help="Output file name.", default=output_location)
-    parser.add_argument("--username", type=str,
-                        help="Your UB username. It's the part of your UB email id before the @buffalo.edu. "
-                             "DO NOT pass incorrect value here")
+    # parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # parser.add_argument("--corpus", type=str, help="Corpus File name, with path.")
+    # parser.add_argument("--output_location", type=str, help="Output file name.", default=output_location)
+    # parser.add_argument("--username", type=str,
+    #                     help="Your UB username. It's the part of your UB email id before the @buffalo.edu. "
+    #                          "DO NOT pass incorrect value here")
+    corpus = '/Users/rajatjain/Desktop/repos/CSE_4535_Fall_2021/project2/data/input_corpus.txt'
+    # argv = parser.parse_args()
 
-    argv = parser.parse_args()
-
-    corpus = argv.corpus
-    output_location = argv.output_location
-    username_hash = hashlib.md5(argv.username.encode()).hexdigest()
+    # corpus = argv.corpus
+    # output_location = argv.output_location
+    # username_hash = hashlib.md5(argv.username.encode()).hexdigest()
 
     """ Initialize the project runner"""
     runner = ProjectRunner()
@@ -197,4 +223,4 @@ if __name__ == "__main__":
         this pre-loaded in memory index. """
     runner.run_indexer(corpus)
 
-    app.run(host="0.0.0.0", port=9999)
+    # app.run(host="0.0.0.0", port=9999)
