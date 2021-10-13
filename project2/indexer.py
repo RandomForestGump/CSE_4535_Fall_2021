@@ -23,6 +23,7 @@ class Indexer:
         # print('Generating Inverted Index for Doc ID: {}'.format(doc_id))
         # print(tokenized_document)
         C = Counter(tokenized_document)
+
         for t in tokenized_document:
             self.add_to_index(t, doc_id, C)
 
@@ -39,29 +40,14 @@ class Indexer:
             If a term is not present in the index, then add the term to the index & initialize a new postings list (linked list).
             If a term is present, then add the document to the appropriate position in the postings list of the term.
             To be implemented."""
-        tf = C[term_]
-        # if term_ not in self.inverted_index:
-        #     self.inverted_index[term_] = LinkedList()
-        # self.inverted_index[term_] = self.inverted_index[term_].insert_at_end(doc_id_)
-        # print(term_)
-        # print(1)
+        tf = C[term_]/ len(C) if len(C)!= 0 else 0
+
         if term_ not in self.inverted_index:
             self.inverted_index[term_] = LinkedList()
             self.inverted_index[term_].insert_at_end(doc_id_, tf)
-        # print(2)
-        # self.print_list(self.inverted_index[term_].start_node)
+
         if not (self.inverted_index[term_].has(doc_id_)):
             self.inverted_index[term_].insert_at_end(doc_id_, tf)
-        # print(3)
-
-
-        # print(self.inverted_index.get('ventilated', 0))
-        # if term_ not in self.inverted_index or not self.inverted_index[term_]:
-        #     self.inverted_index[term_] = LinkedList(doc_id_)
-        #     self.inverted_index[term_].length+=1
-        #
-        # else:
-            #Modify list to add doc id in sorted place using linked list ops
 
 
 
@@ -76,9 +62,14 @@ class Indexer:
     def add_skip_connections(self):
         """ For each postings list in the index, add skip pointers.
             To be implemented."""
-        raise NotImplementedError
 
-    def calculate_tf_idf(self):
+        for term in self.inverted_index.keys():
+            self.inverted_index[term].add_skip_connections()
+
+    def calculate_tf_idf(self, total_docs):
         """ Calculate tf-idf score for each document in the postings lists of the index.
             To be implemented."""
-        raise NotImplementedError
+        vocab = list(self.inverted_index.keys())
+        for key in vocab:
+            #idf = len(posting) /total_docs
+            self.inverted_index[key].idf = self.inverted_index[key].length/ total_docs

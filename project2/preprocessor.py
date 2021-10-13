@@ -31,5 +31,5 @@ class Preprocessor:
 
         text = text.lower()
         text = re.sub('[^A-Za-z0-9]+', ' ', text)
-        text = [e.strip() for e in text.split(' ') if e not in self.stop_words and e != '']
+        text = [self.ps.stem(e.strip()) for e in text.split(' ') if e not in self.stop_words and e != '']
         return text

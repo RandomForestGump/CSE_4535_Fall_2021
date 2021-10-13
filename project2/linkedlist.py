@@ -15,8 +15,8 @@ class Node:
             Hint: You may want to define skip pointers & appropriate score calculation here"""
         self.value = value
         self.next = next
-        self.skip_point = None
         self.tf = tf
+        self.skip_pointer = None
 
 
 class LinkedList:
@@ -29,7 +29,7 @@ class LinkedList:
         self.length, self.n_skips, self.idf = 0, 0, 0.0
         self.skip_length = None
 
-    def traverse_list(self):
+    def traverse_list(self, typ = 'val'):
         traversal = []
         if self.start_node is None:
             return
@@ -38,7 +38,11 @@ class LinkedList:
                 To be implemented."""
             cur = self.start_node
             while cur:
-                traversal.append(cur.val)
+                if typ == 'node':
+                    traversal.append(cur)
+                else:
+                    traversal.append(cur.value)
+                cur = cur.next
 
             return traversal
 
@@ -49,7 +53,11 @@ class LinkedList:
         else:
             """ Write logic to traverse the linked list using skip pointers.
                 To be implemented."""
-            raise NotImplementedError
+            cur = self.start_node
+            while cur:
+                traversal.append(cur.value)
+                cur = cur.skip_pointer
+            # raise NotImplementedError
             return traversal
 
     def has(self, doc_id_):
@@ -63,20 +71,28 @@ class LinkedList:
             cur = cur.next
         return False
 
-
     def add_skip_connections(self):
-        n_skips = math.floor(math.sqrt(self.length))
-        if n_skips * n_skips == self.length:
-            n_skips = n_skips - 1
+        self.n_skips = math.floor(math.sqrt(self.length))
+        self.skip_length = int(round(math.sqrt(self.length), 0))
+        if self.n_skips * self.n_skips == self.length:
+            self.n_skips = self.n_skips - 1
 
         """ Write logic to add skip pointers to the linked list. 
             This function does not return anything.
             To be implemented."""
 
-
-
-
-        raise NotImplementedError
+        cur = self.start_node
+        count = 0
+        indexes = self.traverse_list('node')
+        c = 0
+        while cur:
+            if count + self.skip_length >= self.length or c >= self.n_skips:
+                break
+            ind = count + self.skip_length
+            cur.skip_pointer = indexes[ind]
+            count = count + self.skip_length
+            cur = indexes[ind]
+            c+=1
 
     def insert_at_end(self, value, tf):
         """ Write logic to add new elements to the linked list.

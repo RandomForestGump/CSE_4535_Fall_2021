@@ -29,6 +29,18 @@ class ProjectRunner:
         self.preprocessor = Preprocessor()
         self.indexer = Indexer()
 
+
+
+    def get_highest_tf_idf(self, cur1, cur2, idf1, idf2):
+        tf_idf1 =  cur1.tf*idf1
+        tf_idf2 = cur2.tf*idf2
+
+        if tf_idf1>= tf_idf2:
+            return cur1
+        else:
+            return cur2
+
+
     def _merge(self, l1, l2):
         """ Implement the merge algorithm to merge 2 postings list at a time.
             Use appropriate parameters & return types.
@@ -38,24 +50,28 @@ class ProjectRunner:
         cur1 = l1
         cur2 = l2
         cur3 = dummy = Node(0)
-
+        idf_1 = l1.idf
+        idf_2 = l2.idf
+        compares = 0
         while cur1 and cur2:
 
-            if cur1.value <= cur2.value:
-                cur3.next = cur1
+            if cur1.value == cur2.value:
+
+                cur3.next = self.get_highest_tf_idf(cur1, cur2, idf_1, idf_2)
                 cur1 = cur1.next
+                cur2 = cur2.next
+                cur3 = cur3.next
+
+            elif cur1.value > cur2.value:
+                compares+=1
+                # cur2 = cur2
+                cur2 = cur2.next
 
             else:
-                cur3.next = cur2
-                cur2 = cur2.next
-            cur3 = cur3.next
+                compares+=1
+                cur1 = cur1.next
 
-        if not cur1:
-            cur3.next = cur2
-        if not cur2:
-            cur3.next = cur1
-
-        return dummy.next
+        return dummy.next, compares
 
     def _daat_and(self):
         """ Implement the DAAT AND algorithm, which merges the postings list of N query terms.
@@ -63,11 +79,20 @@ class ProjectRunner:
             To be implemented."""
         raise NotImplementedError
 
-    def _get_postings(self):
+    def _get_postings(self, terms, skip = False):
         """ Function to get the postings list of a term from the index.
             Use appropriate parameters & return types.
             To be implemented."""
-        raise NotImplementedError
+        dic = {}
+        for term_ in terms:
+            dic[term_] = self.indexer.inverted_index[term_]
+            # if not skip:
+            #     return ll.traverse_list()
+            # else:
+            #     return ll.traverse_skips()
+        return {'postingsList': dic}
+
+
 
     def _output_formatter(self, op):
         """ This formats the result in the required format.
@@ -82,18 +107,18 @@ class ProjectRunner:
         """ This function reads & indexes the corpus. After creating the inverted index,
             it sorts the index by the terms, add skip pointers, and calculates the tf-idf scores.
             Already implemented, but you can modify the orchestration, as you seem fit."""
+        total_docs = 0
         with open(corpus, 'r') as fp:
             for line in tqdm(fp.readlines()):
+                total_docs+=1
                 doc_id, document = self.preprocessor.get_doc_id(line)
                 tokenized_document = self.preprocessor.tokenizer(document)
                 self.indexer.generate_inverted_index(doc_id, tokenized_document)
 
         self.indexer.sort_terms()
-        pdb.set_trace()
-
-
         self.indexer.add_skip_connections()
-        self.indexer.calculate_tf_idf()
+        self.indexer.calculate_tf_idf(total_docs)
+        pdb.set_trace()
 
     def sanity_checker(self, command):
         """ DO NOT MODIFY THIS. THIS IS USED BY THE GRADER. """
@@ -126,9 +151,13 @@ class ProjectRunner:
                 3. Get the DAAT AND query results & number of comparisons with & without skip pointers.
                 4. Get the DAAT AND query results & number of comparisons with & without skip pointers, 
                     along with sorting by tf-idf scores."""
-            raise NotImplementedError
+
 
             input_term_arr = []  # Tokenized query. To be implemented.
+            tokenized_document = self.preprocessor.tokenizer(query)
+            input_term_arr = input_term_arr + tokenized_document
+            input_term_arr = list(set(input_term_arr))
+
 
             for term in input_term_arr:
                 postings, skip_postings = None, None
