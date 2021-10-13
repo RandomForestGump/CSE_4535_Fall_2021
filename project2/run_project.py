@@ -29,13 +29,11 @@ class ProjectRunner:
         self.preprocessor = Preprocessor()
         self.indexer = Indexer()
 
-
-
     def get_highest_tf_idf(self, cur1, cur2, idf1, idf2):
-        tf_idf1 =  cur1.tf*idf1
+        tf_idf1 = cur1.tf*idf1
         tf_idf2 = cur2.tf*idf2
 
-        if tf_idf1>= tf_idf2:
+        if tf_idf1 >= tf_idf2:
             return cur1
         else:
             return cur2
@@ -54,30 +52,42 @@ class ProjectRunner:
         idf_2 = l2.idf
         compares = 0
         while cur1 and cur2:
-
             if cur1.value == cur2.value:
-
                 cur3.next = self.get_highest_tf_idf(cur1, cur2, idf_1, idf_2)
                 cur1 = cur1.next
                 cur2 = cur2.next
                 cur3 = cur3.next
-
             elif cur1.value > cur2.value:
                 compares+=1
                 # cur2 = cur2
                 cur2 = cur2.next
-
             else:
                 compares+=1
                 cur1 = cur1.next
 
         return dummy.next, compares
 
-    def _daat_and(self):
+    def sort_terms_in_order(self, query_terms):
+        d = {}
+        for term in query_terms:
+            d[term] = self.indexer.inverted_index[term].length
+        d = {k: v for k, v in sorted(d.items(), key=lambda item: item[1])}
+        return list(d.keys())
+
+    def _daat_and(self, query_terms):
         """ Implement the DAAT AND algorithm, which merges the postings list of N query terms.
             Use appropriate parameters & return types.
             To be implemented."""
-        raise NotImplementedError
+
+        res = []
+        query_terms = self.sort_terms_in_order(query_terms)
+        res.append(query_terms[0])
+        comparisons = 0
+        for i in range(1, len(query_terms)):
+            res, compares = self._merge(res, query_terms[i])
+            comparisons += compares
+        return res, compares
+
 
     def _get_postings(self, terms, skip = False):
         """ Function to get the postings list of a term from the index.
@@ -160,14 +170,14 @@ class ProjectRunner:
 
 
             for term in input_term_arr:
-                postings, skip_postings = None, None
+                postings, skip_postings = self.indexer.inverted_index[term], self.indexer.inverted_index[term]
 
                 """ Implement logic to populate initialize the above variables.
                     The below code formats your result to the required format.
                     To be implemented."""
 
-                output_dict['postingsList'][term] = postings
-                output_dict['postingsListSkip'][term] = skip_postings
+                output_dict['postingsList'][term] = postings.travesre_list()
+                output_dict['postingsListSkip'][term] = skip_postings.traverse_skips()
 
             and_op_no_skip, and_op_skip, and_op_no_skip_sorted, and_op_skip_sorted = None, None, None, None
             and_comparisons_no_skip, and_comparisons_skip, \
