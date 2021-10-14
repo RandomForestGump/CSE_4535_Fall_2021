@@ -2,6 +2,7 @@
 @author: Sougata Saha
 Institute: University at Buffalo
 '''
+import pdb
 
 from linkedlist import LinkedList
 from collections import OrderedDict, Counter
@@ -72,4 +73,11 @@ class Indexer:
         vocab = list(self.inverted_index.keys())
         for key in vocab:
             #idf = len(posting) /total_docs
-            self.inverted_index[key].idf = self.inverted_index[key].length/ total_docs
+            self.inverted_index[key].idf = self.inverted_index[key].length / total_docs
+            cur = self.inverted_index[key].start_node
+            while cur:
+                cur.tf_idf = cur.tf * self.inverted_index[key].idf
+                cur = cur.next
+
+
+

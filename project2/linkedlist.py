@@ -8,7 +8,7 @@ import math
 
 class Node:
 
-    def __init__(self, value=None, next=None, tf = 0):
+    def __init__(self, value=None, next=None, tf = 0, tf_idf = None):
         """ Class to define the structure of each node in a linked list (postings list).
             Value: document id, Next: Pointer to the next node
             Add more parameters if needed.
@@ -16,6 +16,7 @@ class Node:
         self.value = value
         self.next = next
         self.tf = tf
+        self.tf_idf = tf_idf
         self.skip_pointer = None
 
 
@@ -94,14 +95,15 @@ class LinkedList:
             cur = indexes[ind]
             c+=1
 
-    def insert_at_end(self, value, tf):
+    def insert_at_end(self, value, tf, tf_idf = None):
         """ Write logic to add new elements to the linked list.
             Insert the element at an appropriate position, such that elements to the left are lower than the inserted
             element, and elements to the right are greater than the inserted element.
             To be implemented. """
 
-        newNode = Node(value=value, next=None, tf = tf)
+        newNode = Node(value=value, next=None, tf = tf, tf_idf = tf_idf)
         n = self.start_node
+
 
         self.length+=1
 

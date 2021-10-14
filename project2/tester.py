@@ -340,6 +340,6 @@ if __name__ == "__main__":
     # query = ['the novel coronavirus', 'from an epidemic to a pandemic','is hydroxychloroquine effective?']
     # out = runner.run_queries(query)
 
-    # port = 9001
-    port = 9000
+    port = 9001
+    # port = 9999
     app.run(host="0.0.0.0", port=port)
