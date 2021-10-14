@@ -38,6 +38,41 @@ class ProjectRunner:
         else:
             return cur2
 
+    def _merge_skip(self, l1, l2):
+        """ Implement the merge algorithm to merge 2 postings list at a time.
+            Use appropriate parameters & return types.
+            While merging 2 postings list, preserve the maximum tf-idf value of a document.
+            To be implemented."""
+
+        cur1 = l1
+        cur2 = l2
+        cur3 = dummy = Node(0)
+        idf_1 = l1.idf
+        idf_2 = l2.idf
+        compares = 0
+        while cur1 and cur2:
+
+            if cur1.value == cur2.value:
+                compares += 1
+                cur3.next = self.get_highest_tf_idf(cur1, cur2, idf_1, idf_2)
+                cur1 = cur1.next
+                cur2 = cur2.next
+                cur3 = cur3.next
+
+            elif cur1.value < cur2.value:
+                compares+=1
+                if cur1.skip_pointer and cur1.skip_pointer.value <= cur2.value:
+                    while cur1.skip_pointer and cur1.skip_pointer.value <= cur2.value:
+                        cur1 = cur1.skip_pointer
+                    cur1 = cur1.next
+
+            elif cur2.skip_pointer and cur2.skip_pointer.value <= cur1.value:
+                compares+=1
+                while cur2.skip_pointer and cur2.skip_pointer.value <= cur1.value:
+                    cur2 = cur2.skip_pointer
+                cur2 = cur2.next
+
+        return dummy.next, compares
 
     def _merge(self, l1, l2):
         """ Implement the merge algorithm to merge 2 postings list at a time.
@@ -53,13 +88,14 @@ class ProjectRunner:
         compares = 0
         while cur1 and cur2:
             if cur1.value == cur2.value:
+                compares += 1
                 cur3.next = self.get_highest_tf_idf(cur1, cur2, idf_1, idf_2)
                 cur1 = cur1.next
                 cur2 = cur2.next
                 cur3 = cur3.next
             elif cur1.value > cur2.value:
                 compares+=1
-                # cur2 = cur2
+
                 cur2 = cur2.next
             else:
                 compares+=1
@@ -74,7 +110,35 @@ class ProjectRunner:
         d = {k: v for k, v in sorted(d.items(), key=lambda item: item[1])}
         return list(d.keys())
 
-    def _daat_and(self, query_terms):
+    def sort_tf_idf(self, ll):
+        idf = ll.idf
+        cur = ll.start_node
+        vals = {}
+
+        if (cur is None):
+            return
+        temp = cur
+        dummy = Node(0)
+        dummy.next = cur
+        while (temp != None):
+            i = temp.next
+            while (i != None):
+                tf_idf1 = temp.tf * idf
+                tf_idf2 = i.tf * idf
+                if (tf_idf1 < tf_idf2):
+                    n = i.value
+                    m = i.tf
+                    i.value = temp.value
+                    i.tf = temp.tf
+                    temp.value = n
+                    temp.tf = m
+                i = i.next
+            temp = temp.next
+
+        return dummy.next
+
+
+    def _daat_and(self, query_terms, sort = False):
         """ Implement the DAAT AND algorithm, which merges the postings list of N query terms.
             Use appropriate parameters & return types.
             To be implemented."""
@@ -86,6 +150,29 @@ class ProjectRunner:
         for i in range(1, len(query_terms)):
             res, compares = self._merge(res, query_terms[i])
             comparisons += compares
+
+        if sort:
+            res = self.sort_tf_idf(res)
+
+        return res, compares
+
+    def _daat_and_skip(self, query_terms, sort = False):
+        """ Implement the DAAT AND algorithm, which merges the postings list of N query terms.
+            Use appropriate parameters & return types.
+            To be implemented."""
+
+        res = []
+        query_terms = self.sort_terms_in_order(query_terms)
+        res.append(query_terms[0])
+        comparisons = 0
+        for i in range(1, len(query_terms)):
+            res, compares = self._merge_skip(res, query_terms[i])
+            res.add_skip_connections()
+            comparisons += compares
+
+        if sort:
+            res = self.sort_tf_idf(res)
+
         return res, compares
 
 
@@ -162,12 +249,10 @@ class ProjectRunner:
                 4. Get the DAAT AND query results & number of comparisons with & without skip pointers, 
                     along with sorting by tf-idf scores."""
 
-
             input_term_arr = []  # Tokenized query. To be implemented.
             tokenized_document = self.preprocessor.tokenizer(query)
             input_term_arr = input_term_arr + tokenized_document
             input_term_arr = list(set(input_term_arr))
-
 
             for term in input_term_arr:
                 postings, skip_postings = self.indexer.inverted_index[term], self.indexer.inverted_index[term]
@@ -179,9 +264,18 @@ class ProjectRunner:
                 output_dict['postingsList'][term] = postings.travesre_list()
                 output_dict['postingsListSkip'][term] = skip_postings.traverse_skips()
 
-            and_op_no_skip, and_op_skip, and_op_no_skip_sorted, and_op_skip_sorted = None, None, None, None
-            and_comparisons_no_skip, and_comparisons_skip, \
-                and_comparisons_no_skip_sorted, and_comparisons_skip_sorted = None, None, None, None
+            and_op_no_skip, and_comparisons_no_skip = self._daat_and(input_term_arr)
+            and_op_skip, and_comparisons_skip = self._daat_and_skip(input_term_arr)
+            and_op_no_skip_sorted, and_comparisons_no_skip_sorted = self._daat_and(input_term_arr, sort = True)
+            and_op_skip_sorted, and_comparisons_skip_sorted = self._daat_and_skip(input_term_arr, sort = True)
+
+            #
+            # and_op_no_skip,and_comparisons_no_skip, and_op_skip,and_comparisons_skip, \
+            # and_op_no_skip_sorted,and_comparisons_no_skip_sorted, and_op_skip_sorted, \
+            # and_comparisons_skip_sorted = self._daat_and(input_term_arr), self._daat_and_skip(input_term_arr), \
+            #                               self._daat_and(input_term_arr, sort = True), self._daat_and_skip(input_term_arr, sort = True)
+            # and_comparisons_no_skip, and_comparisons_skip, \
+            #     and_comparisons_no_skip_sorted, and_comparisons_skip_sorted = None, None, None, None
             """ Implement logic to populate initialize the above variables.
                 The below code formats your result to the required format.
                 To be implemented."""
@@ -242,18 +336,18 @@ if __name__ == "__main__":
         Do NOT change it."""
 
     output_location = "project2_output.json"
-    # parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    # parser.add_argument("--corpus", type=str, help="Corpus File name, with path.")
-    # parser.add_argument("--output_location", type=str, help="Output file name.", default=output_location)
-    # parser.add_argument("--username", type=str,
-    #                     help="Your UB username. It's the part of your UB email id before the @buffalo.edu. "
-    #                          "DO NOT pass incorrect value here")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--corpus", type=str, help="Corpus File name, with path.")
+    parser.add_argument("--output_location", type=str, help="Output file name.", default=output_location)
+    parser.add_argument("--username", type=str,
+                        help="Your UB username. It's the part of your UB email id before the @buffalo.edu. "
+                             "DO NOT pass incorrect value here")
     corpus = '/Users/rajatjain/Desktop/repos/CSE_4535_Fall_2021/project2/data/input_corpus.txt'
-    # argv = parser.parse_args()
+    argv = parser.parse_args()
 
-    # corpus = argv.corpus
-    # output_location = argv.output_location
-    # username_hash = hashlib.md5(argv.username.encode()).hexdigest()
+    corpus = argv.corpus
+    output_location = argv.output_location
+    username_hash = hashlib.md5(argv.username.encode()).hexdigest()
 
     """ Initialize the project runner"""
     runner = ProjectRunner()
@@ -262,4 +356,4 @@ if __name__ == "__main__":
         this pre-loaded in memory index. """
     runner.run_indexer(corpus)
 
-    # app.run(host="0.0.0.0", port=9999)
+    app.run(host="0.0.0.0", port=9999)
