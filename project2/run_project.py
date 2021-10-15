@@ -52,15 +52,14 @@ class ProjectRunner:
 
             if cur1.value == cur2.value:
                 compares += 1
-                compares += 1
                 a, b = self.get_highest_tf_idf(cur1, cur2)
                 res.insert_at_end(a.value, b, a.tf_idf)
-
                 cur1 = cur1.next
                 cur2 = cur2.next
 
             elif cur1.value < cur2.value:
                 compares+= 1
+
                 if cur1.skip_pointer and cur1.skip_pointer.value <= cur2.value:
                     while cur1.skip_pointer and cur1.skip_pointer.value <= cur2.value:
                         cur1 = cur1.skip_pointer
@@ -68,9 +67,9 @@ class ProjectRunner:
                     cur1 = cur1.next
 
             elif cur1.value > cur2.value:
+                compares+=1
                 if cur2.skip_pointer and cur2.skip_pointer.value <= cur1.value:
 
-                    compares += 1
                     while cur2.skip_pointer and cur2.skip_pointer.value <= cur1.value:
                         cur2 = cur2.skip_pointer
                 else:
