@@ -341,5 +341,5 @@ if __name__ == "__main__":
     # out = runner.run_queries(query)
 
     # port = 9001
-    port = 9000
+    port = 8983
     app.run(host="0.0.0.0", port=port)
