@@ -61,6 +61,7 @@ class ProjectRunner:
                 compares+= 1
 
                 if cur1.skip_pointer and cur1.skip_pointer.value <= cur2.value:
+                    compares+=1
                     while cur1.skip_pointer and cur1.skip_pointer.value <= cur2.value:
                         cur1 = cur1.skip_pointer
                 else:
@@ -69,7 +70,7 @@ class ProjectRunner:
             elif cur1.value > cur2.value:
                 compares+=1
                 if cur2.skip_pointer and cur2.skip_pointer.value <= cur1.value:
-
+                    compares+=1
                     while cur2.skip_pointer and cur2.skip_pointer.value <= cur1.value:
                         cur2 = cur2.skip_pointer
                 else:
@@ -118,6 +119,7 @@ class ProjectRunner:
             var[cur.value] = cur.tf_idf
             cur = cur.next
         var = {k: v for k, v in sorted(var.items(), reverse = True,key=lambda item: item[1])}
+        #var = {k: v for k, v in sorted(var.items(),key=lambda item: item[1])}
         return list(var.keys())
 
     def _daat_and(self, query_terms, sort = False):
@@ -199,8 +201,7 @@ class ProjectRunner:
         self.indexer.sort_terms()
         self.indexer.add_skip_connections()
         self.indexer.calculate_tf_idf(total_docs)
-        # pdb.set_trace()
-
+    
     def sanity_checker(self, command):
         """ DO NOT MODIFY THIS. THIS IS USED BY THE GRADER. """
 
@@ -253,16 +254,15 @@ class ProjectRunner:
             and_op_skip, and_comparisons_skip = self._daat_and_skip(input_term_arr)
             and_op_no_skip_sorted, and_comparisons_no_skip_sorted = self._daat_and(input_term_arr, sort = True)
             and_op_skip_sorted, and_comparisons_skip_sorted = self._daat_and_skip(input_term_arr, sort = True)
-
-            """ Implement logic to populate initialize the above variables.
+            
+   """ Implement logic to populate initialize the above variables.
                 The below code formats your result to the required format.
                 To be implemented."""
             and_op_no_score_no_skip, and_results_cnt_no_skip = self._output_formatter(and_op_no_skip)
-
             and_op_no_score_skip, and_results_cnt_skip = self._output_formatter(and_op_skip)
             and_op_no_score_no_skip_sorted, and_results_cnt_no_skip_sorted = self._output_formatter(and_op_no_skip_sorted)
             and_op_no_score_skip_sorted, and_results_cnt_skip_sorted = self._output_formatter(and_op_skip_sorted)
-
+            
             output_dict['daatAnd'][query.strip()] = {}
             output_dict['daatAnd'][query.strip()]['results'] = and_op_no_score_no_skip
             output_dict['daatAnd'][query.strip()]['num_docs'] = and_results_cnt_no_skip

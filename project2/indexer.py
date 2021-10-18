@@ -26,7 +26,7 @@ class Indexer:
         C = Counter(tokenized_document)
 
         for t in tokenized_document:
-            self.add_to_index(t, doc_id, C)
+            self.add_to_index(t, doc_id,C, len(tokenized_document))
 
     def print_list(self, cur):
         x = []
@@ -36,12 +36,12 @@ class Indexer:
             cur = cur.next
         print(x)
 
-    def add_to_index(self, term_, doc_id_, C):
+    def add_to_index(self, term_, doc_id_, C, doc_len):
         """ This function adds each term & document id to the index.
             If a term is not present in the index, then add the term to the index & initialize a new postings list (linked list).
             If a term is present, then add the document to the appropriate position in the postings list of the term.
             To be implemented."""
-        tf = C[term_]/ len(C) if len(C)!= 0 else 0
+        tf = C[term_]/ doc_len if doc_len!= 0 else 0
 
         if term_ not in self.inverted_index:
             self.inverted_index[term_] = LinkedList()
@@ -73,7 +73,7 @@ class Indexer:
         vocab = list(self.inverted_index.keys())
         for key in vocab:
             #idf = len(posting) /total_docs
-            self.inverted_index[key].idf = self.inverted_index[key].length / total_docs
+            self.inverted_index[key].idf = total_docs/self.inverted_index[key].length
             cur = self.inverted_index[key].start_node
             while cur:
                 cur.tf_idf = cur.tf * self.inverted_index[key].idf
